@@ -15,6 +15,7 @@ import (
 
 	"code.gitea.io/gitea/models/db"
 	repo_model "code.gitea.io/gitea/models/repo"
+	"code.gitea.io/gitea/modules/annex"
 	"code.gitea.io/gitea/modules/git"
 	"code.gitea.io/gitea/modules/graceful"
 	"code.gitea.io/gitea/modules/log"
@@ -251,13 +252,23 @@ func doArchive(r *ArchiveRequest) (*repo_model.RepoArchiver, error) {
 				w,
 			)
 		} else {
-			err = gitRepo.CreateArchive(
-				ctx,
-				archiver.Type,
-				w,
-				setting.Repository.PrefixArchiveFiles,
-				archiver.CommitID,
-			)
+			if annex.IsAnnexRepo(gitRepo) {
+				err = annex.RepoArchive(
+					gitRepo,
+					archiver.Type,
+					w,
+					setting.Repository.PrefixArchiveFiles,
+					archiver.CommitID,
+				)
+			} else {
+				err = gitRepo.CreateArchive(
+					ctx,
+					archiver.Type,
+					w,
+					setting.Repository.PrefixArchiveFiles,
+					archiver.CommitID,
+				)
+			}
 		}
 		_ = w.CloseWithError(err)
 		done <- err
