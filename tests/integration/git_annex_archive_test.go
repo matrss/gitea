@@ -97,9 +97,12 @@ func TestGitAnnexArchive(t *testing.T) {
 				isAnnexed, err := annex.IsAnnexed(blob)
 				require.NoError(t, err)
 
+				fmt.Printf("is annexed: %v", isAnnexed)
+
 				// make sure all files are the same as in the repo itself
 				actualContent, err := io.ReadAll(rd)
 				require.NoError(t, err)
+				fmt.Printf("actual content: '%v'\n", actualContent)
 				if isAnnexed {
 					fa, err := annex.Content(blob)
 					require.NoError(t, err)
@@ -123,6 +126,7 @@ func TestGitAnnexArchive(t *testing.T) {
 					defer r.Close()
 					expectedContent, err := io.ReadAll(r)
 					require.NoError(t, err)
+					fmt.Printf("expected content: '%v'\n", actualContent)
 					require.Equal(t, expectedContent, actualContent)
 				}
 			}
